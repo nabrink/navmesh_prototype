@@ -1,0 +1,23 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{5BBDE40D-227D-47A0-0B01-6C9936C7C092}") = "navmesh_prototype", "Assembly-CSharp.csproj", "{1E5E84BC-11C3-21EC-02B3-5D0A040FC26D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1E5E84BC-11C3-21EC-02B3-5D0A040FC26D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E5E84BC-11C3-21EC-02B3-5D0A040FC26D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E5E84BC-11C3-21EC-02B3-5D0A040FC26D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E5E84BC-11C3-21EC-02B3-5D0A040FC26D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
