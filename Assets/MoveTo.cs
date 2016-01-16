@@ -4,10 +4,23 @@ using System.Collections;
 
 public class MoveTo : MonoBehaviour {
 
-	public Transform goal;
+    public Transform goal = null;
+    NavMeshAgent agent;
 
-	void Start () {
-		NavMeshAgent agent = GetComponent<NavMeshAgent>();
-		agent.destination = goal.position; 
+    void Start () {
+		agent = GetComponent<NavMeshAgent>();
 	}
+
+    void SetDestination(Vector3 pos) {
+
+    }
+
+    void SetGoal(Transform g) {
+        goal = g;
+    }
+
+    void Update() {
+        if (goal != null)
+            agent.destination = goal.position;
+    }
 }
