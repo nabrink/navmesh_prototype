@@ -22,5 +22,6 @@ public class MoveTo : MonoBehaviour {
     void Update() {
         if (goal != null)
             agent.destination = goal.position;
+
     }
 }
