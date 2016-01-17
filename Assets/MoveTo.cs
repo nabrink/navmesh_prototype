@@ -9,6 +9,7 @@ public class MoveTo : MonoBehaviour {
     public Rigidbody rb;
     public FixedJoint shieldJoint;
     public Rigidbody shield;
+    private bool shieldUp = false;
 
     bool isAlive;
 
@@ -21,7 +22,22 @@ public class MoveTo : MonoBehaviour {
         shield.useGravity = false;
     }
 
+    void ToggleShielUp(float val) {
+        if (!isAlive) return;
+        if (shieldUp) {
+            val = -val;
+        }
+        shieldJoint.connectedBody = null;
+        Transform s = transform.FindChild("Shield");
+        Vector3 newPos = s.localPosition;
+        s.localPosition = new Vector3(newPos.x + val, newPos.y += val, newPos.z);
+        shieldJoint.connectedBody = shield;
+        shieldUp = (shieldUp) ? false : true;
+    }
+
     void Kill() {
+        if(agent != null)
+            agent.enabled = false;
         Destroy(agent);
         rb.useGravity = true;
         rb.isKinematic = false;
@@ -57,5 +73,9 @@ public class MoveTo : MonoBehaviour {
                 this.transform.rotation = v;
             }
         }
+        if (Input.GetKeyDown(KeyCode.LeftShift)) {
+            ToggleShielUp(0.2f);
+        }
+
     }
 }

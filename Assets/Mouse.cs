@@ -7,15 +7,26 @@ public class Mouse : MonoBehaviour {
 
     // Use this for initialization
     public Transform pos;
-    private Quaternion lookAtQuat;
 
     GameObject[] agents;
 
     public Vector3 mouseDownPos;
     private float maxRows;
 
+    private float rowSpacing = 1.0f;
+    private float colSpacing = 1.2f;
+
+    private float rows = 0;
+    private float cols = 0;
+
+    private Vector3 lookAtPosition;
+
     void Start () {
-        lookAtQuat = pos.rotation;
+        if (agents != null) {
+            rows = 2;
+            cols = agents.Length / rows;
+        }
+        lookAtPosition = new Vector3(0.0f, 0.0f, 0.0f);
     }
 
     void UpdateUnitCount() {
@@ -27,29 +38,28 @@ public class Mouse : MonoBehaviour {
         UpdateUnitCount();
         Vector3 mouseUpPos = GetWorldPosition();
         pos.position = mouseDownPos;
-        pos.rotation = new Quaternion(0, 0, 0, 0);
-        Debug.Log(lookAtQuat);
+        lookAtPosition = mouseUpPos;
 
         float mouseDelta = GetMouseDelta(mouseDownPos, mouseUpPos);
-        float rows = Mathf.Floor(Map(mouseDelta, 0, 7, 1, maxRows));
-        float cols = agents.Length / rows;
+        rows = Mathf.Floor(Map(mouseDelta, 0, 7, 1, maxRows));
+        cols = agents.Length / rows;
+        SetFormation(rows, cols, mouseUpPos);
+    }
 
-        float rowSpacing = 1.0f;
-        float colSpacing = 1.2f;
-
+    void SetFormation(float rows, float cols, Vector3 lookAt) {
         KillCones();
+        pos.rotation = new Quaternion(0, 0, 0, 0);
 
         int loopCounter = 0;
         for (int i = 0; i < cols; i++) {
             for (int j = 0; j < rows; j++) {
-                if(loopCounter <= agents.Length) {
+                if (loopCounter <= agents.Length) {
                     Vector3 v = new Vector3(pos.position.x - (colSpacing * i) + (cols * colSpacing) / 2, 0.0f, pos.position.z + (rowSpacing * j) - (rows * rowSpacing) / 2);
                     CreateWaypoint(agents, loopCounter++, v);
                 }
             }
         }
-
-        pos.LookAt(mouseUpPos);
+        pos.LookAt(lookAt);
     }
 
     void KillCones()
@@ -63,6 +73,8 @@ public class Mouse : MonoBehaviour {
 
     void CreateWaypoint(GameObject[] agents, int index, Vector3 position) {
         try {
+            if (agents.Length == 0) return;
+
             GameObject obj = GameObject.Instantiate(Resources.Load("cone01")) as GameObject;
             obj.transform.position = new Vector3(position.x, -0.5f, position.z);
             obj.transform.parent = pos.transform;
@@ -110,8 +122,15 @@ public class Mouse : MonoBehaviour {
 
 // Update is called once per frame
     void Update () {
-        if (Input.GetMouseButtonDown(1)) {
-            //
+        if (Input.GetKeyDown("1")) {
+            rowSpacing += 0.05f;
+            colSpacing += 0.05f;
+            SetFormation(rows, cols, lookAtPosition);
+        }
+        if (Input.GetKeyDown("2")) {
+            rowSpacing -= 0.05f;
+            colSpacing -= 0.05f;
+            SetFormation(rows, cols, lookAtPosition);
         }
     }
 }
