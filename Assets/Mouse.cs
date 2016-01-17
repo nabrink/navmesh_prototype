@@ -7,7 +7,7 @@ public class Mouse : MonoBehaviour {
 
     // Use this for initialization
     public Transform pos;
-    private Vector3 lookTowardsPosition;
+    private Quaternion lookAtQuat;
 
     GameObject[] agents;
 
@@ -15,7 +15,7 @@ public class Mouse : MonoBehaviour {
     private float maxRows;
 
     void Start () {
-
+        lookAtQuat = pos.rotation;
     }
 
     void UpdateUnitCount() {
@@ -27,33 +27,46 @@ public class Mouse : MonoBehaviour {
         UpdateUnitCount();
         Vector3 mouseUpPos = GetWorldPosition();
         pos.position = mouseDownPos;
-        lookTowardsPosition = mouseUpPos;
+        pos.rotation = new Quaternion(0, 0, 0, 0);
+        Debug.Log(lookAtQuat);
+
         Debug.Log(agents.Length + " units on the scene.");
         float mouseDelta = GetMouseDelta(mouseDownPos, mouseUpPos);
         float rows = Mathf.Floor(Map(mouseDelta, 0, 7, 1, maxRows));
         float cols = agents.Length / rows;
         Debug.Log("rows: " + rows);
 
-        float rowSpacing = 0.6f;
-        float colSpacing = 1.0f;
+        float rowSpacing = 1.0f;
+        float colSpacing = 1.2f;
+
+        KillCones();
 
         int loopCounter = 0;
         for (int i = 0; i < cols; i++) {
             for (int j = 0; j < rows; j++) {
-                Vector3 v = new Vector3(pos.position.x - (colSpacing * i) + (cols * colSpacing)/2, 0.0f, pos.position.z + (rowSpacing * j) - (rows * rowSpacing)/2);
-                CreateWaypoint(agents, loopCounter, v);
-                loopCounter++;
+                if(loopCounter <= agents.Length) {
+                    Vector3 v = new Vector3(pos.position.x - (colSpacing * i) + (cols * colSpacing) / 2, 0.0f, pos.position.z + (rowSpacing * j) - (rows * rowSpacing) / 2);
+                    CreateWaypoint(agents, loopCounter++, v);
+                }
             }
         }
 
-        pos.LookAt(GetWorldPosition());
-        Debug.Log("pos rotation: " + pos.rotation.ToString());
+        pos.LookAt(mouseUpPos);
+    }
+
+    void KillCones()
+    {
+        GameObject[] childrenOfPos = GameObject.FindGameObjectsWithTag("Cone");
+        foreach (GameObject o in childrenOfPos)
+        {
+            Destroy(o);
+        }
     }
 
     void CreateWaypoint(GameObject[] agents, int index, Vector3 position) {
         try {
-            GameObject obj = Instantiate(new GameObject("conePrefab")) as GameObject;
-            obj.transform.position = new Vector3(position.x, 0.0f, position.z);
+            GameObject obj = GameObject.Instantiate(Resources.Load("cone01")) as GameObject;
+            obj.transform.position = new Vector3(position.x, -0.5f, position.z);
             obj.transform.parent = pos.transform;
             agents[index].SendMessage("SetGoal", obj.transform);
         }
@@ -100,7 +113,6 @@ public class Mouse : MonoBehaviour {
 
 // Update is called once per frame
 void Update () {
-        pos.GetChild(0).LookAt(GetWorldPosition());
         if (Input.GetMouseButtonDown(1)) {
             //
         }

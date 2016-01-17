@@ -23,5 +23,10 @@ public class MoveTo : MonoBehaviour {
         if (goal != null)
             agent.destination = goal.position;
 
+        if (goal != null)
+        {
+            Quaternion v = new Quaternion(goal.rotation.x, goal.rotation.y, goal.rotation.z, goal.rotation.w);
+            this.transform.rotation = v;
+        }
     }
 }
