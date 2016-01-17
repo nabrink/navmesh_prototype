@@ -1,13 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
-    <ProjectGuid>{1E5E84BC-11C3-21EC-02B3-5D0A040FC26D}</ProjectGuid>
+    <RootNamespace></RootNamespace>
+    <ProjectGuid>{78B42BEC-C559-63E3-6996-7DE1ABC1B6B0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -46,17 +45,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Mouse.cs" />
-    <Compile Include="Assets\MoveTo.cs" />
-    <Compile Include="Assets\Spin.cs" />
-    <Compile Include="Assets\arrow.cs" />
-    <None Include="Assets\NewSurfaceShader.shader" />
-    <Reference Include="UnityEngine.UI">
-      <HintPath>G:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>G:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
-    </Reference>
+     <Compile Include="Assets\Mouse.cs" />
+     <Compile Include="Assets\MoveTo.cs" />
+     <Compile Include="Assets\Spin.cs" />
+     <Compile Include="Assets\arrow.cs" />
+     <None Include="Assets\NewSurfaceShader.shader" />
+ <Reference Include="UnityEngine.UI">
+ <HintPath>G:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEngine.Networking">
+ <HintPath>G:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
+ </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -66,4 +65,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  
 </Project>

@@ -30,11 +30,9 @@ public class Mouse : MonoBehaviour {
         pos.rotation = new Quaternion(0, 0, 0, 0);
         Debug.Log(lookAtQuat);
 
-        Debug.Log(agents.Length + " units on the scene.");
         float mouseDelta = GetMouseDelta(mouseDownPos, mouseUpPos);
         float rows = Mathf.Floor(Map(mouseDelta, 0, 7, 1, maxRows));
         float cols = agents.Length / rows;
-        Debug.Log("rows: " + rows);
 
         float rowSpacing = 1.0f;
         float colSpacing = 1.2f;
@@ -80,7 +78,6 @@ public class Mouse : MonoBehaviour {
     }
 
     void OnMouseDown() { 
-        Debug.Log("MOUSE DOWN");
         mouseDownPos = GetWorldPosition();
     }
 
@@ -112,11 +109,9 @@ public class Mouse : MonoBehaviour {
     }
 
 // Update is called once per frame
-void Update () {
+    void Update () {
         if (Input.GetMouseButtonDown(1)) {
             //
         }
-            
-
     }
 }
