@@ -3,52 +3,53 @@ using System.Collections;
 
 public class Formation : MonoBehaviour
 {
-	const int columns = 20;
-	const int rows = 20;
-
 	public float distanceBetweenPositions = 1.0f;
+
 	public Transform positionMarkerPrefab;
-	public Transform parentPosition;
-	public Transform soldier;
-
+    public Transform soldierPrefab;
+    public Transform parentMarker;
+	
 	private Vector3 startPosition;
-	private Queue availablePositions;
-	private int soldierCount = 0;
+    private int columns;
+    private int rows;
 
-    private int[,] formationGrid = new int[columns, rows] {
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
-	};
+    private int[,] formationGrid;
+
+    private ArrayList army;
+    private ArrayList spawnedMarkers;
 		
 	void Start () {
-		availablePositions = new Queue();
+        var grid = new int[10, 10] {
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {1,1,1,1,1,1,1,1,1,1},
+            {1,1,1,1,1,1,1,1,1,1},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0}};
 
-		InitializeFormationGrid ();
-        SpawnSoldiers();
+        CreateArmy(grid, 10, 10);
 	}
 
-	public void InitializeFormationGrid()
+    public void CreateArmy(int[,] formation,int columns, int rows)
+    {
+        this.columns = columns;
+        this.rows = rows;
+        formationGrid = formation;
+
+        Queue initializedPositions = InitializeFormationGrid();
+        SpawnSoldiers(initializedPositions);
+    }
+
+	public Queue InitializeFormationGrid()
 	{
-		Vector3 centerPosition = parentPosition.position;
-        startPosition = new Vector3 (centerPosition.x - (distanceBetweenPositions * (columns/2)), 
+        spawnedMarkers = new ArrayList();
+        Queue availableMarkers = new Queue();
+        Vector3 centerPosition = parentMarker.position;
+        startPosition = new Vector3 (centerPosition.x - (distanceBetweenPositions * (columns / 2)), 
 			centerPosition.y, 
 			centerPosition.z - (distanceBetweenPositions * (rows/2)));
 
@@ -60,35 +61,71 @@ public class Formation : MonoBehaviour
 			{
 				if (formationGrid [y, x] == 1) 
 				{
-                    CreateMarker(positionToBePlaced);
+                    var marker = CreateMarker(positionToBePlaced);
+                    spawnedMarkers.Add(marker);
+                    availableMarkers.Enqueue(marker);
                 }
 				positionToBePlaced = MoveToNextColumn (positionToBePlaced);
 			}
 			positionToBePlaced = MoveToNextRow (positionToBePlaced);
 		}
+
+        return availableMarkers;
 	}
 
-    private void CreateMarker(Vector3 positionToBePlaced)
+    private Transform CreateMarker(Vector3 positionToBePlaced)
     {
-        Transform position = (Transform)Instantiate(positionMarkerPrefab, positionToBePlaced, parentPosition.rotation);
-        position.parent = parentPosition;
-        availablePositions.Enqueue(position);
-        soldierCount++;
+        Transform position = (Transform)Instantiate(positionMarkerPrefab, positionToBePlaced, parentMarker.rotation);
+        position.parent = parentMarker;
+        return position;  
     }
 
-	private void SpawnSoldiers()
+	private void SpawnSoldiers(Queue positions)
 	{
-		for (int i = 0; i < soldierCount; i++)
+        var soldiersNeeded = positions.Count;
+        army = new ArrayList();
+
+		for (int i = 0; i < soldiersNeeded; i++)
         {
-			if (availablePositions.Count > 0)
+			if (positions.Count > 0)
             {
-				Transform spawnPosition = (Transform)availablePositions.Dequeue ();
-				Transform spawnedSoldier = (Transform)Instantiate (soldier, spawnPosition.position, parentPosition.rotation);
-                //Scriptet Soldier är i detta fall det script som hanter vilken position soldaten vill gå
+				Transform spawnPosition = (Transform)positions.Dequeue ();
+				Transform spawnedSoldier = (Transform)Instantiate (soldierPrefab, spawnPosition.position, parentMarker.rotation);
 				spawnedSoldier.GetComponent<Soldier> ().goal = spawnPosition;
+                army.Add(spawnedSoldier);
 			}
 		}
 	}
+
+    private void AssingSolidiers(Queue markers)
+    {
+        if (markers == null || markers.Count == 0) return;
+
+        foreach (Transform s in army)
+        {
+            Transform marker = (Transform)markers.Dequeue();
+            s.GetComponent<Soldier>().goal = marker;
+        }               
+    }
+
+    public void ChangeFormation(int[,] newFormation)
+    {
+        DestroySpawnedMarkers();
+        Queue markers = new Queue();
+        formationGrid = newFormation;
+        markers = InitializeFormationGrid();
+        AssingSolidiers(markers);
+    }
+
+    private void DestroySpawnedMarkers()
+    {
+        foreach(Transform m in spawnedMarkers)
+        {
+            Destroy(m.gameObject);
+        }
+
+        spawnedMarkers = null;
+    }
 
 	private Vector3 MoveToNextColumn(Vector3 currentPosition) 
 	{
@@ -99,9 +136,24 @@ public class Formation : MonoBehaviour
 	{
 		return new Vector3 (startPosition.x, currentPosition.y, currentPosition.z + distanceBetweenPositions);
 	}
-		
-	void Update ()
+
+    void OnGUI()
     {
- 
-	}
+        if (GUILayout.Button("Change formation!"))
+        {
+            int[,] formation = new int[10, 10] {
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0}};
+
+            ChangeFormation(formation);
+        }
+    }
 }
