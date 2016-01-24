@@ -13,32 +13,79 @@ public class Formation : MonoBehaviour
     private int columns;
     private int rows;
 
-    private int[,] formationGrid;
+    private int[,] currentFormation;
+
+    private IList formationList;
 
     private ArrayList army;
     private ArrayList spawnedMarkers;
 		
-	void Start () {
-        var grid = new int[10, 10] {
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {1,1,1,1,1,1,1,1,1,1},
-            {1,1,1,1,1,1,1,1,1,1},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0}};
+    private void InitializeGrids()
+    {
+        formationList = new ArrayList();
 
-        CreateArmy(grid, 10, 10);
+        formationList.Add(new int[10, 10] {
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,1,1,1,1,0,0,0},
+            {0,0,0,1,1,1,1,0,0,0},
+            {0,0,0,1,1,1,1,0,0,0},
+            {0,0,0,1,1,1,1,0,0,0},
+            {0,0,0,1,1,1,1,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0}});
+
+        formationList.Add(new int[10, 10] {
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,1,0,0,0,0},
+            {0,0,1,0,1,0,0,1,0,0},
+            {0,0,0,1,0,1,0,0,0,0},
+            {0,1,0,0,1,0,1,0,1,0},
+            {0,1,0,1,0,1,0,0,0,0},
+            {0,0,0,0,1,0,1,0,0,0},
+            {0,0,1,0,1,0,0,0,1,0},
+            {0,0,0,0,0,1,0,1,0,0},
+            {0,0,0,0,0,0,0,0,0,0}});
+
+        formationList.Add(new int[10, 10] {
+            {0,1,0,1,0,1,0,1,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,1,0,1,0,1,0,1,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,1,0,1,0,1,0,1,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,1,0,1,0,1,0,1,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,1,0,1,0,1,0,1,0,0},
+            {0,0,0,0,0,0,0,0,0,0}});
+
+        formationList.Add(new int[10, 10] {
+            {0,0,0,0,0,0,0,0,0,0},
+            {1,0,0,1,0,0,1,0,0,1},
+            {0,0,0,0,0,0,0,0,0,0},
+            {1,0,0,1,0,0,1,0,0,1},
+            {0,0,0,0,0,0,0,0,0,0},
+            {1,0,0,1,0,0,1,0,0,1},
+            {0,0,0,0,0,0,0,0,0,0},
+            {1,0,0,1,0,0,1,0,0,1},
+            {0,0,0,0,0,0,0,0,0,0},
+            {1,0,0,1,0,0,1,0,0,1}});
+
+        currentFormation = (int[,])formationList[0];
+    }
+
+	void Start ()
+    {
+        InitializeGrids();
+        CreateArmy(currentFormation, 10, 10);
 	}
 
     public void CreateArmy(int[,] formation,int columns, int rows)
     {
         this.columns = columns;
         this.rows = rows;
-        formationGrid = formation;
+        currentFormation = formation;
 
         Queue initializedPositions = InitializeFormationGrid();
         SpawnSoldiers(initializedPositions);
@@ -50,8 +97,8 @@ public class Formation : MonoBehaviour
         Queue availableMarkers = new Queue();
         Vector3 centerPosition = parentMarker.position;
         startPosition = new Vector3 (centerPosition.x - (distanceBetweenPositions * (columns / 2)), 
-			centerPosition.y, 
-			centerPosition.z - (distanceBetweenPositions * (rows/2)));
+			                            centerPosition.y, 
+			                            centerPosition.z - (distanceBetweenPositions * (rows/2)));
 
 		var positionToBePlaced = startPosition;
 
@@ -59,7 +106,7 @@ public class Formation : MonoBehaviour
 		{
 			for (int x = 0; x < rows; x++) 
 			{
-				if (formationGrid [y, x] == 1) 
+				if (currentFormation[y, x] != 0) 
 				{
                     var marker = CreateMarker(positionToBePlaced);
                     spawnedMarkers.Add(marker);
@@ -69,7 +116,6 @@ public class Formation : MonoBehaviour
 			}
 			positionToBePlaced = MoveToNextRow (positionToBePlaced);
 		}
-
         return availableMarkers;
 	}
 
@@ -112,7 +158,7 @@ public class Formation : MonoBehaviour
     {
         DestroySpawnedMarkers();
         Queue markers = new Queue();
-        formationGrid = newFormation;
+        currentFormation = newFormation;
         markers = InitializeFormationGrid();
         AssingSolidiers(markers);
     }
@@ -141,67 +187,19 @@ public class Formation : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            int[,] formation = new int[10, 10] {
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,1,1,1,1,0,0,0},
-            {0,0,0,1,1,1,1,0,0,0},
-            {0,0,0,1,1,1,1,0,0,0},
-            {0,0,0,1,1,1,1,0,0,0},
-            {0,0,0,1,1,1,1,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0}};
-
-            ChangeFormation(formation);
+            ChangeFormation((int[,])formationList[0]);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            int[,] formation = new int[10, 10] {
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,1,0,0,0,0},
-            {0,0,1,0,1,0,0,1,0,0},
-            {0,0,0,1,0,1,0,0,0,0},
-            {0,1,0,0,1,0,1,0,1,0},
-            {0,1,0,1,0,1,0,0,0,0},
-            {0,0,0,0,1,0,1,0,0,0},
-            {0,0,1,0,1,0,0,0,1,0},
-            {0,0,0,0,0,1,0,1,0,0},
-            {0,0,0,0,0,0,0,0,0,0}};
-
-            ChangeFormation(formation);
+            ChangeFormation((int[,])formationList[1]);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            int[,] formation = new int[10, 10] {
-            {0,1,0,1,0,1,0,1,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,1,0,1,0,1,0,1,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,1,0,1,0,1,0,1,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,1,0,1,0,1,0,1,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,1,0,1,0,1,0,1,0,0},
-            {0,0,0,0,0,0,0,0,0,0}};
-
-            ChangeFormation(formation);
+            ChangeFormation((int[,])formationList[2]);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            int[,] formation = new int[10, 10] {
-            {0,0,0,0,0,0,0,0,0,0},
-            {1,0,0,1,0,0,1,0,0,1},
-            {0,0,0,0,0,0,0,0,0,0},
-            {1,0,0,1,0,0,1,0,0,1},
-            {0,0,0,0,0,0,0,0,0,0},
-            {1,0,0,1,0,0,1,0,0,1},
-            {0,0,0,0,0,0,0,0,0,0},
-            {1,0,0,1,0,0,1,0,0,1},
-            {0,0,0,0,0,0,0,0,0,0},
-            {1,0,0,1,0,0,1,0,0,1}};
-
-            ChangeFormation(formation);
+            ChangeFormation((int[,])formationList[3]);
         }
     }
 }
