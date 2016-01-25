@@ -1,15 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets;
 
 public class Formation : MonoBehaviour
 {
 	public float distanceBetweenPositions = 1.0f;
 
 	public Transform positionMarkerPrefab;
-    public Transform soldierPrefab;
     public Transform parentMarker;
-	
-	private Vector3 startPosition;
+
+    public Transform defaultSoldier;
+    public Transform shieldedSoldier;
+
+    private Vector3 startPosition;
     private int columns;
     private int rows;
 
@@ -17,8 +20,8 @@ public class Formation : MonoBehaviour
 
     private IList formationList;
 
-    private ArrayList army;
-    private ArrayList spawnedMarkers;
+    private IList army;
+    private IList spawnedMarkers;
 		
     private void InitializeGrids()
     {
@@ -27,11 +30,11 @@ public class Formation : MonoBehaviour
         formationList.Add(new int[10, 10] {
             {0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,2,1,1,2,0,0,0},
             {0,0,0,1,1,1,1,0,0,0},
             {0,0,0,1,1,1,1,0,0,0},
             {0,0,0,1,1,1,1,0,0,0},
-            {0,0,0,1,1,1,1,0,0,0},
-            {0,0,0,1,1,1,1,0,0,0},
+            {0,0,0,2,1,1,2,0,0,0},
             {0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0}});
@@ -39,17 +42,17 @@ public class Formation : MonoBehaviour
         formationList.Add(new int[10, 10] {
             {0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,1,0,0,0,0},
-            {0,0,1,0,1,0,0,1,0,0},
+            {0,0,2,0,1,0,0,2,0,0},
             {0,0,0,1,0,1,0,0,0,0},
-            {0,1,0,0,1,0,1,0,1,0},
+            {0,1,0,0,1,0,2,0,1,0},
             {0,1,0,1,0,1,0,0,0,0},
             {0,0,0,0,1,0,1,0,0,0},
-            {0,0,1,0,1,0,0,0,1,0},
+            {0,0,2,0,1,0,0,0,1,0},
             {0,0,0,0,0,1,0,1,0,0},
             {0,0,0,0,0,0,0,0,0,0}});
 
         formationList.Add(new int[10, 10] {
-            {0,1,0,1,0,1,0,1,0,0},
+            {0,2,0,1,0,1,0,2,0,0},
             {0,0,0,0,0,0,0,0,0,0},
             {0,1,0,1,0,1,0,1,0,0},
             {0,0,0,0,0,0,0,0,0,0},
@@ -57,12 +60,12 @@ public class Formation : MonoBehaviour
             {0,0,0,0,0,0,0,0,0,0},
             {0,1,0,1,0,1,0,1,0,0},
             {0,0,0,0,0,0,0,0,0,0},
-            {0,1,0,1,0,1,0,1,0,0},
+            {0,2,0,1,0,1,0,2,0,0},
             {0,0,0,0,0,0,0,0,0,0}});
 
         formationList.Add(new int[10, 10] {
             {0,0,0,0,0,0,0,0,0,0},
-            {1,0,0,1,0,0,1,0,0,1},
+            {2,0,0,1,0,0,1,0,0,2},
             {0,0,0,0,0,0,0,0,0,0},
             {1,0,0,1,0,0,1,0,0,1},
             {0,0,0,0,0,0,0,0,0,0},
@@ -70,7 +73,7 @@ public class Formation : MonoBehaviour
             {0,0,0,0,0,0,0,0,0,0},
             {1,0,0,1,0,0,1,0,0,1},
             {0,0,0,0,0,0,0,0,0,0},
-            {1,0,0,1,0,0,1,0,0,1}});
+            {2,0,0,1,0,0,1,0,0,2}});
 
         currentFormation = (int[,])formationList[0];
     }
@@ -87,14 +90,13 @@ public class Formation : MonoBehaviour
         this.rows = rows;
         currentFormation = formation;
 
-        Queue initializedPositions = InitializeFormationGrid();
+        IList initializedPositions = InitializeFormationGrid();
         SpawnSoldiers(initializedPositions);
     }
 
-	public Queue InitializeFormationGrid()
+	public IList InitializeFormationGrid()
 	{
         spawnedMarkers = new ArrayList();
-        Queue availableMarkers = new Queue();
         Vector3 centerPosition = parentMarker.position;
         startPosition = new Vector3 (centerPosition.x - (distanceBetweenPositions * (columns / 2)), 
 			                            centerPosition.y, 
@@ -109,14 +111,13 @@ public class Formation : MonoBehaviour
 				if (currentFormation[y, x] != 0) 
 				{
                     var marker = CreateMarker(positionToBePlaced);
-                    spawnedMarkers.Add(marker);
-                    availableMarkers.Enqueue(marker);
+                    spawnedMarkers.Add(new Position(marker, currentFormation[y,x]));
                 }
 				positionToBePlaced = MoveToNextColumn (positionToBePlaced);
 			}
 			positionToBePlaced = MoveToNextRow (positionToBePlaced);
 		}
-        return availableMarkers;
+        return spawnedMarkers;
 	}
 
     private Transform CreateMarker(Vector3 positionToBePlaced)
@@ -126,7 +127,7 @@ public class Formation : MonoBehaviour
         return position;  
     }
 
-	private void SpawnSoldiers(Queue positions)
+	private void SpawnSoldiers(IList positions)
 	{
         var soldiersNeeded = positions.Count;
         army = new ArrayList();
@@ -135,29 +136,44 @@ public class Formation : MonoBehaviour
         {
 			if (positions.Count > 0)
             {
-				Transform spawnPosition = (Transform)positions.Dequeue ();
-				Transform spawnedSoldier = (Transform)Instantiate (soldierPrefab, spawnPosition.position, parentMarker.rotation);
-				spawnedSoldier.GetComponent<Soldier> ().goal = spawnPosition;
+				Position spawnPosition = (Position)positions[i];
+                Transform soldierPrefab = GetSoldierPrefabByType(spawnPosition.SoldierType);
+				Transform spawnedSoldier = (Transform)Instantiate (soldierPrefab, spawnPosition.Marker.position, parentMarker.rotation);
+				spawnedSoldier.GetComponent<Soldier> ().goal = spawnPosition.Marker;
                 army.Add(spawnedSoldier);
 			}
 		}
 	}
 
-    private void AssingSolidiers(Queue markers)
+    private Transform GetSoldierPrefabByType(int soldierType)
+    {
+        var soldierPrefab = defaultSoldier;
+
+        if (soldierType == 2)
+        {
+            soldierPrefab = shieldedSoldier;
+        }
+
+        return soldierPrefab;
+    }
+
+    private void AssingSolidiers(IList markers)
     {
         if (markers == null || markers.Count == 0) return;
 
+        int index = 0;
         foreach (Transform s in army)
         {
-            Transform marker = (Transform)markers.Dequeue();
-            s.GetComponent<Soldier>().goal = marker;
+            Position position = (Position)markers[index];
+            s.GetComponent<Soldier>().goal = position.Marker;
+            index++;
         }               
     }
 
     public void ChangeFormation(int[,] newFormation)
     {
         DestroySpawnedMarkers();
-        Queue markers = new Queue();
+        IList markers = new ArrayList();
         currentFormation = newFormation;
         markers = InitializeFormationGrid();
         AssingSolidiers(markers);
@@ -165,9 +181,9 @@ public class Formation : MonoBehaviour
 
     private void DestroySpawnedMarkers()
     {
-        foreach(Transform m in spawnedMarkers)
+        foreach(Position pos in spawnedMarkers)
         {
-            Destroy(m.gameObject);
+            Destroy(pos.Marker.gameObject);
         }
 
         spawnedMarkers = null;
@@ -184,6 +200,11 @@ public class Formation : MonoBehaviour
 	}
 
     void Update()
+    {
+        HandleUserInput();
+    }
+
+    private void HandleUserInput()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
